@@ -1,0 +1,16 @@
+[project]
+name = "python-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp>=3.13.0",
+    "fastapi>=0.119.0",
+    "flet>=0.28.3",
+    "pillow>=11.3.0",
+    "python-multipart>=0.0.20",
+    "python-telegram-bot>=22.5",
+    "qrcode>=8.2",
+    "uvicorn>=0.37.0",
+]
