@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Number Checker API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #666;
+        }
+
+        .api-docs {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .api-docs pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+        }
+
+        .endpoint h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .method.post {
+            background: #48bb78;
+            color: white;
+        }
+
+        .method.get {
+            background: #4299e1;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 WhatsApp Number Checker</h1>
+            <p>API for checking WhatsApp registration status</p>
+        </div>
+
+        <div class="card">
+            <h2>Check Number</h2>
+            <div class="input-group">
+                <label for="phoneNumber">Phone Number (with country code)</label>
+                <input type="text" id="phoneNumber" placeholder="+1234567890">
+            </div>
+            <button onclick="checkNumber()">Check Number</button>
+            <div id="checkResult" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2>Create Session</h2>
+            <div class="input-group">
+                <label for="sessionPhone">Phone Number (for pairing code)</label>
+                <input type="text" id="sessionPhone" placeholder="+1234567890">
+            </div>
+            <button onclick="createSession()">Generate Pairing Code</button>
+            <div id="sessionResult" class="result"></div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Server Statistics</h2>
+            <button onclick="loadStats()">Refresh Stats</button>
+            <div id="stats" class="stats-grid"></div>
+        </div>
+
+        <div class="card">
+            <h2>📚 API Documentation</h2>
+            <div class="api-docs">
+                <div class="endpoint">
+                    <h4><span class="method post">POST</span>/check</h4>
+                    <p>Check if a phone number is registered on WhatsApp</p>
+                    <pre>{
+  "phoneNumber": "+1234567890"
+}</pre>
+                </div>
+
+                <div class="endpoint">
+                    <h4><span class="method post">POST</span>/create-session</h4>
+                    <p>Create a new WhatsApp session with pairing code</p>
+                    <pre>{
+  "phoneNumber": "+1234567890"
+}</pre>
+                </div>
+
+                <div class="endpoint">
+                    <h4><span class="method post">POST</span>/upload-session</h4>
+                    <p>Upload an existing WhatsApp session file</p>
+                    <pre>Form Data: session_file (File)</pre>
+                </div>
+
+                <div class="endpoint">
+                    <h4><span class="method get">GET</span>/stats</h4>
+                    <p>Get server statistics</p>
+                </div>
+
+                <div class="endpoint">
+                    <h4><span class="method get">GET</span>/whatsapp-status</h4>
+                    <p>Get WhatsApp connection status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkNumber() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const resultDiv = document.getElementById('checkResult');
+
+            if (!phoneNumber) {
+                showResult(resultDiv, 'Please enter a phone number', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phoneNumber })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultDiv, `✅ ${phoneNumber} is ${data.status}`, 'success');
+                } else {
+                    showResult(resultDiv, `❌ Error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultDiv, `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createSession() {
+            const phoneNumber = document.getElementById('sessionPhone').value;
+            const resultDiv = document.getElementById('sessionResult');
+
+            if (!phoneNumber) {
+                showResult(resultDiv, 'Please enter a phone number', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/create-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phoneNumber })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(resultDiv, `🔐 Pairing Code: ${data.pairingCode}`, 'success');
+                } else {
+                    showResult(resultDiv, `❌ Error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultDiv, `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadStats() {
+            const statsDiv = document.getElementById('stats');
+
+            try {
+                const response = await fetch('/stats');
+                const data = await response.json();
+
+                statsDiv.innerHTML = `
+                    <div class="stat-card">
+                        <h3>${data.total_checks}</h3>
+                        <p>Total Checks</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${data.registered}</h3>
+                        <p>Registered</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${data.not_registered}</h3>
+                        <p>Not Registered</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${data.uptime_formatted}</h3>
+                        <p>Uptime</p>
+                    </div>
+                `;
+            } catch (error) {
+                statsDiv.innerHTML = `<p>Error loading stats: ${error.message}</p>`;
+            }
+        }
+
+        function showResult(element, message, type) {
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        loadStats();
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+  </html>
+  
